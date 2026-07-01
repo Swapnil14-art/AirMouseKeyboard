@@ -1,0 +1,31 @@
+# Camera
+
+CAMERA_ID = 0
+
+# Tracking Area
+
+FRAME_MARGIN = 100
+
+# Mouse
+
+SMOOTHING = 6
+
+# Gesture Thresholds
+
+LEFT_CLICK_DISTANCE = 35
+RIGHT_CLICK_DISTANCE = 35
+DRAG_DISTANCE = 30
+DRAG_START_FRAMES = 15
+CLICK_COOLDOWN = 8
+
+# Pointer Finger
+
+POINTER_FINGER = 8
+
+# Gesture Fingers
+
+THUMB_TIP = 4
+INDEX_TIP = 8
+MIDDLE_TIP = 12
+RING_TIP = 16
+PINKY_TIP = 20
