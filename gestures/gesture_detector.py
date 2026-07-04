@@ -22,7 +22,7 @@ class GestureDetector:
         return math.hypot(x2 - x1, y2 - y1)
 
     def detect(self, landmarks):
-
+        """Detect mouse-related gestures (clicks, drag)."""
         thumb = landmarks[THUMB_TIP]
         middle = landmarks[MIDDLE_TIP]
         ring = landmarks[RING_TIP]

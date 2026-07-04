@@ -1,7 +1,5 @@
 class FingerDetector:
-
-    def __init__(self):
-        pass
+    """Detects extended fingers from hand landmarks."""
 
     def get_fingers(self, landmarks):
 

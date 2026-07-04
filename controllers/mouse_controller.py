@@ -9,20 +9,9 @@ class MouseController:
 
         self.screen_width, self.screen_height = pyautogui.size()
 
-        self.prev_x = 0
-        self.prev_y = 0
-
-        self.smoothing = 6
-
     def move(self, x, y):
 
-        current_x = self.prev_x + (x - self.prev_x) / self.smoothing
-        current_y = self.prev_y + (y - self.prev_y) / self.smoothing
-
-        pyautogui.moveTo(current_x, current_y)
-
-        self.prev_x = current_x
-        self.prev_y = current_y
+        pyautogui.moveTo(x, y)
 
     def left_click(self):
 
@@ -36,7 +25,7 @@ class MouseController:
         
     def mouse_down(self):
         
-            pyautogui.mouseDown()
+        pyautogui.mouseDown()
         
         
     def mouse_up(self):
