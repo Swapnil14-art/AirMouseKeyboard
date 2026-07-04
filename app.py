@@ -65,7 +65,10 @@ class AirControlApp:
             # Mode Management
             if self.hand_manager.has_two_hands():
                 # Check if anchor hand is making a fist to activate keyboard mode
-                anchor_fingers = self.finger_detector.get_fingers(self.hand_manager.anchor_hand.landmarks)
+                anchor_fingers = self.finger_detector.get_fingers(
+                    self.hand_manager.anchor_hand.landmarks,
+                    label=self.hand_manager.anchor_hand.label
+                )
                 fist_state = self.fist_detector.detect(anchor_fingers)
                 
                 if self.fist_detector.is_fist_confirmed():
@@ -125,7 +128,10 @@ class AirControlApp:
                     self.mouse.move(smooth_x, smooth_y)
 
                 # Detect Gesture on pointer hand
-                fingers = self.finger_detector.get_fingers(self.hand_manager.pointer_hand.landmarks)
+                fingers = self.finger_detector.get_fingers(
+                    self.hand_manager.pointer_hand.landmarks,
+                    label=self.hand_manager.pointer_hand.label
+                )
                 current_gesture = self.gesture.detect(self.hand_manager.pointer_hand.landmarks)
                 
                 # Handle keyboard input in Keyboard Mode

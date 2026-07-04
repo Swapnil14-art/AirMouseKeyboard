@@ -207,7 +207,8 @@ class CameraWorker(QObject):
 
         if self.hand_manager.has_two_hands():
             anchor_fingers = self.finger_detector.get_fingers(
-                self.hand_manager.anchor_hand.landmarks
+                self.hand_manager.anchor_hand.landmarks,
+                label=self.hand_manager.anchor_hand.label
             )
             self.fist_detector.detect(anchor_fingers)
 
@@ -284,7 +285,8 @@ class CameraWorker(QObject):
                 self.mouse.move(smooth_x, smooth_y)
 
             fingers = self.finger_detector.get_fingers(
-                self.hand_manager.pointer_hand.landmarks
+                self.hand_manager.pointer_hand.landmarks,
+                label=self.hand_manager.pointer_hand.label
             )
             current_gesture = self.gesture.detect(
                 self.hand_manager.pointer_hand.landmarks

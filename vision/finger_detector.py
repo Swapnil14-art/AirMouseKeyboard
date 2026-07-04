@@ -1,15 +1,21 @@
 class FingerDetector:
     """Detects extended fingers from hand landmarks."""
 
-    def get_fingers(self, landmarks):
+    def get_fingers(self, landmarks, label="Left"):
 
         fingers = []
 
         # Thumb
-        if landmarks[4][1] > landmarks[3][1]:
-            fingers.append(1)
-        else:
-            fingers.append(0)
+        if label == "Left":
+            if landmarks[4][1] > landmarks[3][1]:
+                fingers.append(1)
+            else:
+                fingers.append(0)
+        else: # Right hand
+            if landmarks[4][1] < landmarks[3][1]:
+                fingers.append(1)
+            else:
+                fingers.append(0)
 
         # Index
         fingers.append(
