@@ -39,6 +39,7 @@ class AirControlApp:
         self.fps_counter = 0
         self.fps_start_time = time.time()
         self.current_fps = 0
+        self._fist_latch = False
 
     def run(self):
         while True:
@@ -63,22 +64,37 @@ class AirControlApp:
                 self.fps_start_time = time.time()
 
             # Mode Management
-            if self.hand_manager.has_two_hands():
-                # Check if anchor hand is making a fist to activate keyboard mode
-                anchor_fingers = self.finger_detector.get_fingers(
-                    self.hand_manager.anchor_hand.landmarks,
-                    label=self.hand_manager.anchor_hand.label
-                )
-                fist_state = self.fist_detector.detect(anchor_fingers)
-                
-                if self.fist_detector.is_fist_confirmed():
-                    self.mode_manager.set_keyboard_mode()
-                else:
-                    self.mode_manager.set_mouse_mode()
-            else:
-                # Single hand always in mouse mode
+            if not self.hand_manager.has_pointer():
                 self.mode_manager.set_mouse_mode()
                 self.fist_detector.reset()
+                self._fist_latch = False
+            else:
+                # Determine which hand to check for fist (mode toggle)
+                fist_hand = None
+                if self.hand_manager.has_two_hands():
+                    fist_hand = self.hand_manager.anchor_hand
+                elif self.mode_manager.is_keyboard_mode():
+                    fist_hand = self.hand_manager.pointer_hand
+
+                if fist_hand is not None:
+                    fingers = self.finger_detector.get_fingers(
+                        fist_hand.landmarks,
+                        label=fist_hand.label
+                    )
+                    self.fist_detector.detect(fingers)
+                    
+                    if self.fist_detector.is_fist_confirmed():
+                        if not self._fist_latch:
+                            if self.mode_manager.is_mouse_mode():
+                                self.mode_manager.set_keyboard_mode()
+                            else:
+                                self.mode_manager.set_mouse_mode()
+                            self._fist_latch = True
+                    else:
+                        self._fist_latch = False
+                else:
+                    self.fist_detector.reset()
+                    self._fist_latch = False
 
             if self.hand_manager.has_pointer():
                 # Pointer Finger

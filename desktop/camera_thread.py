@@ -78,6 +78,7 @@ class CameraWorker(QObject):
         self._last_tracking = False
         self._last_action = "Idle"
         self._frame_failures = 0
+        self._fist_latch = False
 
     def start(self) -> None:
         """Initialize components on the worker thread and begin processing."""
@@ -205,20 +206,38 @@ class CameraWorker(QObject):
             self.fps_start_time = time.time()
             self.fps_changed.emit(self.current_fps)
 
-        if self.hand_manager.has_two_hands():
-            anchor_fingers = self.finger_detector.get_fingers(
-                self.hand_manager.anchor_hand.landmarks,
-                label=self.hand_manager.anchor_hand.label
-            )
-            self.fist_detector.detect(anchor_fingers)
-
-            if self.fist_detector.is_fist_confirmed():
-                self.mode_manager.set_keyboard_mode()
-            else:
-                self.mode_manager.set_mouse_mode()
-        else:
+        # Check if we have a pointer hand at all
+        if not self.hand_manager.has_pointer():
             self.mode_manager.set_mouse_mode()
             self.fist_detector.reset()
+            self._fist_latch = False
+        else:
+            # Determine which hand to check for fist (mode toggle)
+            fist_hand = None
+            if self.hand_manager.has_two_hands():
+                fist_hand = self.hand_manager.anchor_hand
+            elif self.mode_manager.is_keyboard_mode():
+                fist_hand = self.hand_manager.pointer_hand
+
+            if fist_hand is not None:
+                fingers = self.finger_detector.get_fingers(
+                    fist_hand.landmarks,
+                    label=fist_hand.label
+                )
+                self.fist_detector.detect(fingers)
+                
+                if self.fist_detector.is_fist_confirmed():
+                    if not self._fist_latch:
+                        if self.mode_manager.is_mouse_mode():
+                            self.mode_manager.set_keyboard_mode()
+                        else:
+                            self.mode_manager.set_mouse_mode()
+                        self._fist_latch = True
+                else:
+                    self._fist_latch = False
+            else:
+                self.fist_detector.reset()
+                self._fist_latch = False
 
         current_mode = self.mode_manager.get_mode().value
         if current_mode != self._last_mode:
