@@ -8,16 +8,18 @@ class FistState(Enum):
 
 
 class FistDetector:
-    """Detects fist gestures with timing confirmation."""
+    """Detects fist gestures with timing confirmation and release debouncing."""
 
-    def __init__(self, hold_duration_frames=10):  # ~0.17 seconds at 60fps
+    def __init__(self, hold_duration_frames=10, exit_duration_frames=5):
         self.hold_duration_frames = hold_duration_frames
+        self.exit_duration_frames = exit_duration_frames
         self.hold_counter = 0
+        self.release_counter = 0
         self.state = FistState.OPEN
 
     def detect(self, fingers):
         """
-        Detect fist gesture with timing confirmation.
+        Detect fist gesture with timing confirmation and release debouncing.
         
         Args:
             fingers: List of 5 integers (0=finger closed, 1=finger open)
@@ -27,16 +29,26 @@ class FistDetector:
         """
         is_fist = sum(fingers) == 0  # All fingers closed
 
-        if is_fist:
-            self.hold_counter += 1
-            
-            if self.hold_counter >= self.hold_duration_frames:
-                self.state = FistState.FIST_CONFIRMED
+        if self.state == FistState.FIST_CONFIRMED:
+            if not is_fist:
+                self.release_counter += 1
+                if self.release_counter >= self.exit_duration_frames:
+                    self.state = FistState.OPEN
+                    self.hold_counter = 0
+                    self.release_counter = 0
             else:
-                self.state = FistState.HOLDING
+                self.release_counter = 0
         else:
-            self.hold_counter = 0
-            self.state = FistState.OPEN
+            if is_fist:
+                self.hold_counter += 1
+                if self.hold_counter >= self.hold_duration_frames:
+                    self.state = FistState.FIST_CONFIRMED
+                    self.release_counter = 0
+                else:
+                    self.state = FistState.HOLDING
+            else:
+                self.hold_counter = 0
+                self.state = FistState.OPEN
 
         return self.state
 
@@ -47,4 +59,5 @@ class FistDetector:
     def reset(self):
         """Reset the detector state."""
         self.hold_counter = 0
+        self.release_counter = 0
         self.state = FistState.OPEN

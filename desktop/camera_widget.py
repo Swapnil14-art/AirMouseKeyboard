@@ -54,18 +54,19 @@ class CameraWidget(QWidget):
         if mode == "MOUSE":
             h, w, _ = render_frame.shape
             margin_x = int(w * 0.2)
-            margin_y = int(h * 0.2)
+            margin_y_top = int(h * 0.125)
+            margin_y_bottom = int(h * 0.725)
             cv2.rectangle(
                 render_frame,
-                (margin_x, margin_y),
-                (w - margin_x, h - margin_y),
+                (margin_x, margin_y_top),
+                (w - margin_x, margin_y_bottom),
                 (246, 130, 59),  # primary blue color (BGR)
                 2
             )
             cv2.putText(
                 render_frame,
                 "Mouse Window (60%)",
-                (margin_x + 5, margin_y + 18),
+                (margin_x + 5, margin_y_top + 18),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
                 (246, 130, 59),

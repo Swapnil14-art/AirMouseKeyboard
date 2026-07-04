@@ -545,7 +545,7 @@ class UIRenderer:
         
         return frame
     
-    def draw_active_area(self, frame: np.ndarray, margin_x: int, margin_y: int) -> np.ndarray:
+    def draw_active_area(self, frame: np.ndarray, margin_x: int, margin_y_top: int, margin_y_bottom: int) -> np.ndarray:
         """Draw the active tracking area rectangle."""
         h, w, _ = frame.shape
         
@@ -553,8 +553,8 @@ class UIRenderer:
         overlay = frame.copy()
         cv2.rectangle(
             overlay,
-            (margin_x, margin_y),
-            (w - margin_x, h - margin_y),
+            (margin_x, margin_y_top),
+            (w - margin_x, margin_y_bottom),
             theme.colors.primary,
             2
         )
