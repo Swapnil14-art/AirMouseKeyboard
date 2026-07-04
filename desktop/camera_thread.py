@@ -195,8 +195,12 @@ class CameraWorker(QObject):
             self.camera_state_changed.emit(True)
             self.status_message.emit("Camera connected")
 
-        frame, hands = self.tracker.process(frame, mirror=self.camera.mirror if self.camera else True)
-        self.hand_manager.update(hands)
+        mirror_val = self.camera.mirror if self.camera else True
+        frame, hands = self.tracker.process(frame, mirror=mirror_val)
+        self.hand_manager.update(hands, mirror=mirror_val)
+
+        if len(hands) > 0:
+            print(f"[DEBUG] Detected Hands: {[h.label for h in hands]}")
 
         self.fps_counter += 1
         elapsed = time.time() - self.fps_start_time
@@ -212,19 +216,15 @@ class CameraWorker(QObject):
             self.fist_detector.reset()
             self._fist_latch = False
         else:
-            # Determine which hand to check for fist (mode toggle)
-            fist_hand = None
+            # We ONLY allow toggling if two hands are detected (using the anchor hand / none primary hand)
             if self.hand_manager.has_two_hands():
                 fist_hand = self.hand_manager.anchor_hand
-            elif self.mode_manager.is_keyboard_mode():
-                fist_hand = self.hand_manager.pointer_hand
-
-            if fist_hand is not None:
                 fingers = self.finger_detector.get_fingers(
                     fist_hand.landmarks,
                     label=fist_hand.label
                 )
                 self.fist_detector.detect(fingers)
+                print(f"[DEBUG] Fist Hand: {fist_hand.label}, Fingers: {fingers}, Fist State: {self.fist_detector.state.value}, confirmed: {self.fist_detector.is_fist_confirmed()}")
                 
                 if self.fist_detector.is_fist_confirmed():
                     if not self._fist_latch:
