@@ -9,8 +9,8 @@ class KeyboardUI:
         self.keys = [
             ["Q","W","E","R","T","Y","U","I","O","P"],
             ["A","S","D","F","G","H","J","K","L"],
-            ["Z","X","C","V","B","N","M"],
-            ["SPACE", "BACKSPACE"]
+            ["Z","X","C","V","B","N","M","BACKSPACE"],
+            ["SPACE"]
         ]
         self.key_width = 50
         self.key_height = 50
@@ -21,17 +21,22 @@ class KeyboardUI:
     def get_key_width(self, key):
         """Get the width of the key (special handling for Space and Backspace)."""
         if key == "SPACE":
-            return 250
+            return 300
         elif key == "BACKSPACE":
-            return 150
+            return 120
         return self.key_width
 
     def get_hovered_key(self, x, y):
         """Get the key at the given coordinates."""
         current_y = self.start_y
+        # Calculate max keyboard width based on Row 1 (10 keys of 50px with 8px spacing)
+        max_keyboard_width = 10 * self.key_width + 9 * 8
 
         for row in self.keys:
-            current_x = self.start_x
+            # Calculate total width of current row
+            row_w = sum(self.get_key_width(k) for k in row) + (len(row) - 1) * 8
+            # Center the row
+            current_x = self.start_x + (max_keyboard_width - row_w) // 2
 
             for key in row:
                 key_w = self.get_key_width(key)
@@ -51,9 +56,14 @@ class KeyboardUI:
             return frame
 
         current_y = self.start_y
+        # Calculate max keyboard width based on Row 1
+        max_keyboard_width = 10 * self.key_width + 9 * theme.keyboard.key_spacing
 
         for row in self.keys:
-            current_x = self.start_x
+            # Calculate total width of current row
+            row_w = sum(self.get_key_width(k) for k in row) + (len(row) - 1) * theme.keyboard.key_spacing
+            # Center the row
+            current_x = self.start_x + (max_keyboard_width - row_w) // 2
 
             for key in row:
                 hovered = (key == self.hovered_key)
